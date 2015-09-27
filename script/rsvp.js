@@ -139,25 +139,49 @@ $(window).ready(function() {
         $('#veg-info-value').val($(this).val());
     });
 
+    var rsvp;
     // validate before save
     $( "#save" ).click(function( event ) {
-        if(!validate()) {
-            event.preventDefault();
-        }
-        else {
+        event.preventDefault();
+        if(validate()) {
+            rsvp =  { name: $('#name-input').val(),
+                adults: $('#adults-value').val() ,
+                kids: $('#kids-value').val(),
+                vegan: $('#tiv').val(),
+                vegetarian: $('#veg').val(),
+                vegan_num: $('#veg-value').val(),
+                vegan_text: $('#veg-info-value').val(),
+                action: "save"
+            };
+
             // Fire off the request to /form.php
             var request = $.ajax({
-                url: "/rsvp/form.php",
+                url: "/rsvp/php/form.php",
                 type: "post",
-                data:  { name: $('name-input').val()}
+                data: rsvp
             });
 
-            // Callback handler that will be called on success
             request.done(function (response, textStatus, jqXHR){
-                // Log a message to the console
-                console.log("Hooray, it worked!");
+                var result = JSON.parse(response);
+                if (result.exist === true) {
+                    var confirmString = "מישהו כבר נרשם עם השם " + result.name;
+                    var toChange = "\r\nהאם ברצונך לשנות את אישור ההגעה הקיים?";
+                    toChange = "\r\n האם ניסית לשנות אישור הגעה קיים? (אם לא אנא בחר שם אחר)"
+
+                    var ans = confirm(confirmString + toChange);
+                    // user wants to override a record
+                    if (ans) {
+                        rsvp.action = "overwrite";
+                        request = $.ajax({
+                            url: "/rsvp/php/form.php",
+                            type: "post",
+                            data: rsvp
+                        });
+                    }
+                } else if (result.success) {
+                    alert('הרישום בוצע בהצלחה, נתראה בחתונה!');
+                }
             });
-            event.preventDefault();
         }
     });
 });
