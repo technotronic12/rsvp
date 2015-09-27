@@ -1,11 +1,6 @@
 $(window).ready(function() {
-
-    function hasActive(element) {
-        return element.attr('class').indexOf('active') > -1 ? true : false;
-    }
-
-    var veg = $('#veg-button');
-    var tiv = $('#tiv-button');
+    var vegetarian = $('#veg-button');
+    var vegan = $('#tiv-button');
     var vegNum = $('#veg-num-group');
 
     function validate() {
@@ -13,59 +8,73 @@ $(window).ready(function() {
         var kids = $('#kids-value').val();
         var name = $('#name-input').val();
 
-        var adultsValidation = $('#adults-value + .validation');
-        var nameValidation = $('#name-input').next();
-        var vegNumValidation = $('#veg-num-group .validation');
-
-        var validated = true;
-        // validate name
-        if (name === '' || name === ' ' || name.length < 2) {
-            validated = false;
-            handleValidationAlert(nameValidation, true);
-        } else {
-            handleValidationAlert(nameValidation, false);
-        }
-        // validate adults num
-        if (adults < 1) {
-            handleValidationAlert(adultsValidation, true);
-            validated = false;
-        } else {
-            handleValidationAlert(adultsValidation, false);
-        }
-        // validate vegan
-        if ($('#veg').val() !== 'false' || $('#tiv').val() !== 'false') {
-
-            if ($('#veg-value').css('display') !== 'none' && parseInt($('#veg-value option:selected').val()) !== 0) {
-                handleValidationAlert(vegNumValidation, false);
-
-            } else if ($('#veg-value').css('display') !== 'none')  {
-                handleValidationAlert(vegNumValidation, true);
-                validated = false;
-            }
-        }
-
-        return validated;
+        return isValidName(name) & isValidAdultsNum(adults) & isValidVeg()
     }
 
-    function handleValidationAlert(element, shouldDisplay) {
+    function isValidVeg() {
+        var vegNumValidation = $('#veg-num-group .validation');
+        if ($('#veg').val() !== 'false' || $('#tiv').val() !== 'false') {
+            // check if vegetarian select is shown and value is 0
+            if ($('#veg-value').css('display') !== 'none' && parseInt($('#veg-value option:selected').val()) !== 0) {
+                showOrHideValidationWarning(vegNumValidation, false);
+                // value is not 0
+            } else if ($('#veg-value').css('display') !== 'none')  {
+                showOrHideValidationWarning(vegNumValidation, true);
+                return false;
+            }
+        }
+        return true;
+
+    }
+
+    function isValidAdultsNum(adults) {
+        var adultsValidation = $('#adults-value + .validation');
+        // validate adults num
+        if (adults < 1) {
+            showOrHideValidationWarning(adultsValidation, true);
+            return false;
+        } else {
+            showOrHideValidationWarning(adultsValidation, false);
+            return true;
+        }
+    }
+
+    function isValidName(name) {
+        var nameValidation = $('#name-input').next();
+        // validate name
+        if (name === '' || name === ' ' || name.length < 2) {
+            showOrHideValidationWarning(nameValidation, true);
+            return false;
+        } else {
+            showOrHideValidationWarning(nameValidation, false);
+            return true;
+        }
+    }
+
+    function showOrHideValidationWarning(element, shouldDisplay) {
         if (shouldDisplay) {
             element.css('display', 'block');
         } else {
             element.hide();
         }
-        return shouldDisplay;
     }
 
     function isActive(element) {
         return element.attr('class').indexOf('active') > -1;
     }
 
-    function updateMaxNumOfVeg() {
+    // sums the total num of vegans and saves them in a hidden input.
+    function updateVeganNum() {
         var kidsNum = parseInt($('#kids-value option:selected').text()) || 0;
         var adultsNum = parseInt($('#adults-value option:selected').text()) || 0;
-        var maxVegVal = adultsNum + kidsNum !== 0 ? adultsNum + kidsNum : 10;
+        var maxVeg = adultsNum + kidsNum !== 0 ? adultsNum + kidsNum : 10;
+        fillSelectWithVeganNum(maxVeg);
+    }
+
+    // fills the select input with options
+    function fillSelectWithVeganNum(maxVeg) {
         emptyVeganNum();
-        for (var i = 0; i < maxVegVal; i++) {
+        for (var i = 0; i < maxVeg; i++) {
             $('#veg-value').append($('<option>', {
                 value: i + 1,
                 text: i + 1
@@ -73,6 +82,7 @@ $(window).ready(function() {
         }
     }
 
+    // empty the select input
     function emptyVeganNum() {
         $('#veg-value').empty();
         $('#veg-value').append($('<option>', {
@@ -81,6 +91,32 @@ $(window).ready(function() {
         }));
     }
 
+    function showSummary(rsvp) {
+        $('#rsvp').hide();
+        $('#confirm').show();
+        $('#confirm-name').text(rsvp.name);
+        $('#confirm-adults').text(rsvp.adults);
+        $('#confirm-kids').text(rsvp.kids);
+        if (rsvp.vegetarian ||rsvp.vegan) {
+            var tiv = rsvp.vegan ? "טבעוני" : "צמחוני";
+            $('.confirm-veg').each(function() {
+                $(this).css('display', 'block');
+            });
+
+            if(rsvp.vegan_text === '') {
+                $('#confirm-vegan-text').hide();
+            }
+            $('#confirm-veg').text(tiv);
+            $('#confirm-veg-num').text(rsvp.vegan_num);
+            $('#confirm-veg-text').text(rsvp.vegan_text);
+        } else {
+            $('.confirm-veg').each(function() {
+                $(this).hide();
+            });
+        }
+    }
+
+    // toggles the vegan and vegetarian buttons and opens more vegan selectors if needed
     function toggleActive(clickedButton, secondButton) {
 
         if (isActive(clickedButton)) {
@@ -97,7 +133,7 @@ $(window).ready(function() {
             var sibling = clickedButton.prev();
             sibling.val(true);
 
-            updateMaxNumOfVeg();
+            updateVeganNum();
 
             if (isActive(secondButton)) {
                 secondButton.removeClass('active');
@@ -109,19 +145,19 @@ $(window).ready(function() {
         secondButton.blur();
     }
 
-    veg.click(function(event) {
-        toggleActive(veg, tiv);
+    vegetarian.click(function(event) {
+        toggleActive(vegetarian, vegan);
         event.stopPropagation();
     });
 
-    tiv.click(function(event) {
-        toggleActive(tiv, veg);
+    vegan.click(function(event) {
+        toggleActive(vegan, vegetarian);
         event.stopPropagation();
     });
 
     // change number of available vegans
     $('#adults-value, #kids-value').change(function () {
-        updateMaxNumOfVeg();
+        updateVeganNum();
     });
 
     // open textarea for vegan
@@ -140,48 +176,63 @@ $(window).ready(function() {
     });
 
     var rsvp;
-    // validate before save
     $( "#save" ).click(function( event ) {
         event.preventDefault();
+
+        // validate before save
         if(validate()) {
             rsvp =  { name: $('#name-input').val(),
                 adults: $('#adults-value').val() ,
                 kids: $('#kids-value').val(),
-                vegan: $('#tiv').val(),
-                vegetarian: $('#veg').val(),
+                vegan: $('#tiv').val() === "true" ? 1 : 0,
+                vegetarian: $('#veg').val() === "true" ? 1 : 0,
                 vegan_num: $('#veg-value').val(),
                 vegan_text: $('#veg-info-value').val(),
                 action: "save"
             };
 
-            // Fire off the request to /form.php
-            var request = $.ajax({
-                url: "/rsvp/php/form.php",
-                type: "post",
-                data: rsvp
-            });
-
-            request.done(function (response, textStatus, jqXHR){
-                var result = JSON.parse(response);
-                if (result.exist === true) {
-                    var confirmString = "מישהו כבר נרשם עם השם " + result.name;
-                    var toChange = "\r\nהאם ברצונך לשנות את אישור ההגעה הקיים?";
-                    toChange = "\r\n האם ניסית לשנות אישור הגעה קיים? (אם לא אנא בחר שם אחר)"
-
-                    var ans = confirm(confirmString + toChange);
-                    // user wants to override a record
-                    if (ans) {
-                        rsvp.action = "overwrite";
-                        request = $.ajax({
-                            url: "/rsvp/php/form.php",
-                            type: "post",
-                            data: rsvp
-                        });
-                    }
-                } else if (result.success) {
-                    alert('הרישום בוצע בהצלחה, נתראה בחתונה!');
-                }
-            });
+            showSummary(rsvp);
+            //TODO show summary of record
         }
+    });
+
+    $('#confirm-btn-save').click(function() {
+        // Fire off the request to /form.php
+        var request = $.ajax({
+            url: "/rsvp/php/form.php",
+            type: "post",
+            data: rsvp
+        });
+
+        request.done(function (response, textStatus, jqXHR){
+            var result = JSON.parse(response);
+            // handle existing name
+            if (result.exist === true) {
+                //TODO show overwrite warning
+                var confirmString = "מישהו כבר נרשם עם השם " + result.name;
+                var toChange = "\r\nהאם ברצונך לשנות את אישור ההגעה הקיים?";
+                toChange = "\r\n האם ניסית לשנות אישור הגעה קיים? (אם לא אנא בחר שם אחר)"
+
+                var ans = confirm(confirmString + toChange);
+                // user wants to override a record
+                if (ans) {
+                    rsvp.action = "overwrite";
+                    request = $.ajax({
+                        url: "/rsvp/php/form.php",
+                        type: "post",
+                        data: rsvp
+                    });
+                }
+            } else if (result.success) {
+                //TODO show success message
+                alert('הרישום בוצע בהצלחה, נתראה בחתונה!');
+            }
+        });
+
+    });
+
+    $('#confirm-btn-fix').click(function() {
+        $('#confirm').hide();
+        $('#rsvp').show();
     });
 });

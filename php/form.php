@@ -12,14 +12,14 @@ function saveToDb($rsvp) {
     $name = $rsvp['name'];
     $adults = $rsvp['adults'];
     $kids = $rsvp['kids'];
-    $vegan = $rsvp['vegan'];
-    $vegetarian = $rsvp['vegetarian'];
+    $vegan = (int)$rsvp['vegan'];
+    $vegetarian = (int)$rsvp['vegetarian'];
     $veganNum = isset($rsvp['vegan_num']) ? $rsvp['vegan_num'] : 0;
     $veganText = $rsvp['vegan_text'] === "" ? "no" : $rsvp['vegan_text'];
 
     $db = Database::getInstance();
     $dbh = $db->getConnection();
-//    $query = 'UPDATE  `lets_do_it_db1`.`groups` SET  `activity_id` = '.$minMaxItemId. ' WHERE  `groups`.`id` = '.$group->id;
+//   overwrite is used to update existing record
     if ($rsvp['action'] === "save")
         $stmt = $dbh->prepare("INSERT INTO rsvp (name, adults, kids, vegan, vegetarian, vegan_num, vegan_text) VALUES (:name, :adults, :kids, :vegan, :vegetarian, :vegan_num, :vegan_text)");
     else

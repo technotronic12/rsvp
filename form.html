@@ -18,6 +18,16 @@
         #veg-info { width: 300px; text-align: right; display: none; margin-top: 15px;  height: 44px; resize: none;}
         #veg-more-comp-link { margin-bottom: 15px; }
         .validation { color: red; font-size: small; display: none; widtH: 100%; text-align: right; }
+        .left, .right { float: right; width: 50%; }
+        .text-right { display: block; }
+        #confirm-message { padding: 10px; !important }
+        #confirm-message-text { padding: 10px; }
+        #confirm { display: none; }
+        .confirm-veg { display: none; }
+        .confirm-controls { margin-top: 20px; text-align: center }
+        .confirm-controls button { width: 46%; margin: 0 auto; }
+        #confirm-btn-save { margin-left: 2%;}
+        .confirm-label { color: grey; }
     </style>
 </head>
 <body>
@@ -68,10 +78,10 @@
                 </select>
             </div>
             <div class="form-group" id="veg-form-group">
-                <input type="hidden" id="veg" value="false" name="vegetarian">
-                <button type="button" class="btn btn-info" id="veg-button">טבעוני</button>
                 <input type="hidden" id="tiv" value="false" name="vegan">
-                <button type="button" class="btn btn-success" id="tiv-button">צמחוני</button>
+                <button type="button" class="btn btn-info" id="tiv-button">טבעוני</button>
+                <input type="hidden" id="veg" value="false" name="vegetarian">
+                <button type="button" class="btn btn-success" id="veg-button">צמחוני</button>
             </div>
             <div id="veg-num-group" class="form-group">
                 <select  id="veg-value" class="form-control" name="vegan_num" dir="rtl">
@@ -85,6 +95,44 @@
             </div>
             <button type="submit" id="save" class="btn btn-primary">שלח</button>
         </form>
+        <div id="confirm" dir="rtl">
+            <p class="message text-right bg-success" id="confirm-message-text">
+                אנא וודא\י שהפרטים שהזנת נכונים:
+            </p>
+            <div id="confirm-message">
+                <div class="right">
+                    <span class="text-right confirm-label">
+                        שם
+                    </span>
+                    <span class="text-right confirm-label">
+                        מבוגרים
+                    </span>
+                    <span class="text-right confirm-label">
+                        ילדים
+                    </span>
+                    <span class="text-right confirm-veg confirm-label">
+                        צמחוני \ טבעוני
+                    </span>
+                    <span class="text-right confirm-veg confirm-label">
+                        מספר
+                    </span>
+                    <span class="text-right confirm-veg confirm-label" id="confirm-vegan-text">
+                        טקסט
+                    </span>
+                </div>
+
+                <span class="text-right" id="confirm-name"></span>
+                <span class="text-right" id="confirm-adults"></span>
+                <span class="text-right" id="confirm-kids"></span>
+                <span class="text-right" id="confirm-veg" class="confirm-veg"></span>
+                <span class="text-right" id="confirm-veg-num" class="confirm-veg"></span>
+                <span class="text-right" id="confirm-veg-text" class="confirm-veg"></span>
+            </div>
+            <div class="confirm-controls">
+                <button type="button" class="btn btn-primary" id="confirm-btn-save">הפרטים נכונים, שלח!</button>
+                <button type="button" class="btn btn-default" id="confirm-btn-fix">תיקון</button>
+            </div>
+        </div>
     </div>
 </div>
 </body>
