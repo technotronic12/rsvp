@@ -11,6 +11,7 @@ function saveToDb($rsvp) {
     $vegetarian = $rsvp['vegetarian'];
     $veganNum = isset($rsvp['vegan_num']) ? $rsvp['vegan_num'] : 0;
     $veganText = $rsvp['vegan_text'] === "" ? "no" : $rsvp['vegan_text'];
+
     $db = Database::getInstance();
     $dbh = $db->getConnection();
 
@@ -24,9 +25,17 @@ function saveToDb($rsvp) {
     $stmt->bindParam(':vegan_text', $veganText);
 
     $stmt->execute();
+}
 
-//    $fields = "'". $name . "'," . $adults . "," . $kids . "," . $vegan . "," . $vegetarian . "," . $veganNum . ",'" .$veganText ."')";
-//    $query = "INSERT INTO rsvp (name, adults, kids, vegan, vegetarian, vegan_num, vegan_text) values (" . $fields;
+function checkIfNameExist($name) {
+    $query = "SELECT 1 FROM rsvp where name = :name";
 
-//    Database::runInsertQuery2($query);
+    $db = Database::getInstance();
+    $dbh = $db->getConnection();
+
+    $stmt = $dbh->prepare($query);
+    $stmt->bindParam(':name', $name);
+
+    $result = $stmt->execute();
+    return $result;
 }
